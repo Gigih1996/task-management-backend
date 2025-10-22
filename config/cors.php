@@ -20,7 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:5173'),
+        env('FRONTEND_URL', 'http://localhost:5173', 'https://task-management-frontend-liard-tau.vercel.app/'),
         'https://*.vercel.app',
     ],
 
