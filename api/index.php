@@ -35,14 +35,33 @@ try {
     // Bootstrap Laravel application
     $app = require_once __DIR__ . '/../bootstrap/app.php';
 
+    // Override exception handler BEFORE creating kernel
+    $app->singleton(
+        \Illuminate\Contracts\Debug\ExceptionHandler::class,
+        \App\Exceptions\Handler::class
+    );
+
     // Create HTTP Kernel
     $kernel = $app->make(Kernel::class);
 
     // Capture request
     $request = Request::capture();
 
-    // Handle the request
-    $response = $kernel->handle($request);
+    // Handle the request with internal exception catching
+    try {
+        $response = $kernel->handle($request);
+    } catch (Throwable $kernelException) {
+        // Catch any exception from kernel and return JSON
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $kernelException->getMessage(),
+            'error' => class_basename($kernelException),
+            'file' => $kernelException->getFile(),
+            'line' => $kernelException->getLine(),
+        ], JSON_PRETTY_PRINT);
+        exit;
+    }
 
     // Send the response
     $response->send();
