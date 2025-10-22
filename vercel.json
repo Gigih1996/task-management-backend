@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/index.php",
-      "use": "vercel-php@0.7.1"
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.7.1",
+      "memory": 1024,
+      "maxDuration": 10
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
@@ -14,11 +15,15 @@
   ],
   "env": {
     "APP_ENV": "production",
-    "APP_DEBUG": "true",
-    "VIEW_COMPILED_PATH": "/tmp",
+    "APP_DEBUG": "false",
+    "APP_NAME": "Task Management API",
+    "VIEW_COMPILED_PATH": "/tmp/views",
     "CACHE_DRIVER": "array",
     "LOG_CHANNEL": "stderr",
     "SESSION_DRIVER": "array",
-    "QUEUE_CONNECTION": "sync"
+    "QUEUE_CONNECTION": "sync",
+    "FILESYSTEM_DISK": "local",
+    "BROADCAST_DRIVER": "log",
+    "DB_CONNECTION": "mongodb"
   }
 }
