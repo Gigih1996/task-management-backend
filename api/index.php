@@ -40,6 +40,20 @@ try {
         }
     }
 
+    // Clear any cached routes to ensure fresh route loading in serverless
+    $cacheFiles = [
+        '/tmp/routes.php',
+        '/tmp/config.php',
+        '/tmp/services.php',
+        '/tmp/packages.php',
+        '/tmp/events.php'
+    ];
+    foreach ($cacheFiles as $file) {
+        if (file_exists($file)) {
+            @unlink($file);
+        }
+    }
+
     // Override bootstrap cache path to use /tmp
     $_ENV['APP_BOOTSTRAP_CACHE'] = '/tmp/cache';
     putenv('APP_BOOTSTRAP_CACHE=/tmp/cache');
