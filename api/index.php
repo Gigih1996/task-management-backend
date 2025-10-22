@@ -35,10 +35,27 @@ try {
     // Bootstrap Laravel application
     $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // Override exception handler BEFORE creating kernel
+    // Create custom exception handler that NEVER uses views
     $app->singleton(
         \Illuminate\Contracts\Debug\ExceptionHandler::class,
-        \App\Exceptions\Handler::class
+        function() {
+            return new class extends \Illuminate\Foundation\Exceptions\Handler {
+                public function render($request, Throwable $e) {
+                    $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+                    if ($status < 100 || $status >= 600) $status = 500;
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage() ?: 'Server Error',
+                        'error' => class_basename($e),
+                    ], $status);
+                }
+
+                protected function registerErrorViewPaths() {
+                    // Override to do nothing - prevent view loading
+                }
+            };
+        }
     );
 
     // Create HTTP Kernel
@@ -47,21 +64,8 @@ try {
     // Capture request
     $request = Request::capture();
 
-    // Handle the request with internal exception catching
-    try {
-        $response = $kernel->handle($request);
-    } catch (Throwable $kernelException) {
-        // Catch any exception from kernel and return JSON
-        http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'message' => $kernelException->getMessage(),
-            'error' => class_basename($kernelException),
-            'file' => $kernelException->getFile(),
-            'line' => $kernelException->getLine(),
-        ], JSON_PRETTY_PRINT);
-        exit;
-    }
+    // Handle the request
+    $response = $kernel->handle($request);
 
     // Send the response
     $response->send();
