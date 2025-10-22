@@ -23,6 +23,7 @@ return [
         env('FRONTEND_URL', 'http://localhost:5173'),
         'https://*.vercel.app',
         'https://task-management-frontend-liard-tau.vercel.app/',
+        'https://task-management-frontend-liard-tau.vercel.app/api/',
     ],
 
     'allowed_origins_patterns' => [
