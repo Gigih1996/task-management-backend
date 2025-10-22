@@ -23,6 +23,21 @@ try {
     // Define Laravel start time
     define('LARAVEL_START', microtime(true));
 
+    // Clear any cached route files in /tmp (Vercel serverless)
+    $cacheFiles = [
+        '/tmp/config.php',
+        '/tmp/routes.php',
+        '/tmp/events.php',
+        '/tmp/packages.php',
+        '/tmp/services.php'
+    ];
+
+    foreach ($cacheFiles as $cacheFile) {
+        if (file_exists($cacheFile)) {
+            @unlink($cacheFile);
+        }
+    }
+
     // Load Composer autoloader
     require __DIR__ . '/../vendor/autoload.php';
 
