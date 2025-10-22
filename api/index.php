@@ -64,6 +64,19 @@ try {
     // Set bootstrap cache path on application
     $app->useBootstrapPath('/tmp/cache');
 
+    // Force load routes manually for Vercel (withRouting might not work in serverless)
+    $app->booted(function() use ($app) {
+        $router = $app->make('router');
+
+        // Load API routes manually
+        $router->group([
+            'prefix' => 'api',
+            'middleware' => ['api'],
+        ], function ($router) {
+            require __DIR__ . '/../routes/api.php';
+        });
+    });
+
     // Create custom exception handler that NEVER uses views
     $app->singleton(
         \Illuminate\Contracts\Debug\ExceptionHandler::class,
