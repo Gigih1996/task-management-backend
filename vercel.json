@@ -1,12 +1,18 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.7.1",
-      "memory": 1024,
-      "maxDuration": 10
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "vercel-php@0.7.1",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
