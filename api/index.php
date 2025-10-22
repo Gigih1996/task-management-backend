@@ -2,6 +2,8 @@
 
 // Laravel Serverless Entry Point for Vercel
 
+use Illuminate\Http\Request;
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
@@ -18,22 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
+    // Define Laravel start time
+    define('LARAVEL_START', microtime(true));
+
     // Load Composer autoloader
     require __DIR__ . '/../vendor/autoload.php';
 
     // Bootstrap Laravel application
     $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // Handle the request
-    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-
-    $response = $kernel->handle(
-        $request = Illuminate\Http\Request::capture()
-    );
-
-    $response->send();
-
-    $kernel->terminate($request, $response);
+    // Handle the request (Laravel 11 style)
+    $app->handleRequest(Request::capture());
 
 } catch (\Throwable $e) {
     // Log error and return JSON response
