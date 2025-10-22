@@ -3,7 +3,6 @@
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Database Connection Name
@@ -30,7 +29,6 @@ return [
     */
 
     'connections' => [
-
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
@@ -113,19 +111,24 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
-        'mongodb' => [
-            'driver' => 'mongodb',
-            'host' => env('MONGODB_HOST', '127.0.0.1'),
-            'port' => env('MONGODB_PORT', 27017),
-            'database' => env('MONGODB_DATABASE', 'task_management'),
-            'username' => env('MONGODB_USERNAME', ''),
-            'password' => env('MONGODB_PASSWORD', ''),
-            'options' => [
-                'database' => env('MONGODB_AUTH_DATABASE', 'admin'),
-                'appName' => env('APP_NAME', 'Laravel'),
-            ],
-        ],
+        // 'mongodb' => [
+        //     'driver' => 'mongodb',
+        //     'host' => env('MONGODB_HOST', '127.0.0.1'),
+        //     'port' => env('MONGODB_PORT', 27017),
+        //     'database' => env('MONGODB_DATABASE', 'task_management'),
+        //     'username' => env('MONGODB_USERNAME', ''),
+        //     'password' => env('MONGODB_PASSWORD', ''),
+        //     'options' => [
+        //         'database' => env('MONGODB_AUTH_DATABASE', 'admin'),
+        //         'appName' => env('APP_NAME', 'Laravel'),
+        //     ],
+        // ],
 
+        'mongodb' => [
+            'driver'   => 'mongodb',
+            'dsn'      => env('DB_DSN'),
+            'database' => env('DB_DATABASE'),
+        ],
     ],
 
     /*
@@ -156,12 +159,11 @@ return [
     */
 
     'redis' => [
-
         'client' => env('REDIS_CLIENT', 'phpredis'),
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 
@@ -190,7 +192,5 @@ return [
             'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
             'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
         ],
-
     ],
-
 ];
