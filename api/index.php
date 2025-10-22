@@ -44,7 +44,8 @@ try {
                     $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
                     if ($status < 100 || $status >= 600) $status = 500;
 
-                    return response()->json([
+                    // Use Response class directly - avoid response() helper that loads view service
+                    return new \Illuminate\Http\JsonResponse([
                         'success' => false,
                         'message' => $e->getMessage() ?: 'Server Error',
                         'error' => class_basename($e),
