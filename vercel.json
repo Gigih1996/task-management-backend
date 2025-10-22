@@ -1,15 +1,20 @@
 {
   "version": 2,
-  "framework": null,
-  "installCommand": "composer install --no-dev --optimize-autoloader",
-  "buildCommand": "echo 'Build complete'",
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.7.1",
-      "maxDuration": 10
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "vercel-php@0.7.1"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
-  },
+  ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.php"
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index.php"
