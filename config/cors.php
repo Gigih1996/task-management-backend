@@ -21,9 +21,7 @@ return [
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
-        'https://*.vercel.app',
-        'https://task-management-frontend-liard-tau.vercel.app/',
-        'https://task-management-frontend-liard-tau.vercel.app/api/',
+        'https://task-management-frontend-liard-tau.vercel.app',
     ],
 
     'allowed_origins_patterns' => [
@@ -36,6 +34,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];
