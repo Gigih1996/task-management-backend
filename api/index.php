@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Content-Type: application/json');
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -16,26 +17,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Define Laravel start time
-define('LARAVEL_START', microtime(true));
+try {
+    // Define Laravel start time
+    define('LARAVEL_START', microtime(true));
 
-// Load Composer autoloader
-require __DIR__ . '/../vendor/autoload.php';
+    // Check if APP_KEY is set
+    if (empty($_ENV['APP_KEY']) && empty(getenv('APP_KEY'))) {
+        throw new Exception('APP_KEY environment variable is not set. Please configure it in Vercel Dashboard.');
+    }
 
-// Bootstrap Laravel application
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+    // Load Composer autoloader
+    if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        throw new Exception('Composer autoloader not found. Please run composer install.');
+    }
+    require __DIR__ . '/../vendor/autoload.php';
 
-// Create HTTP Kernel
-$kernel = $app->make(Kernel::class);
+    // Bootstrap Laravel application
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// Capture request
-$request = Request::capture();
+    // Create HTTP Kernel
+    $kernel = $app->make(Kernel::class);
 
-// Handle the request
-$response = $kernel->handle($request);
+    // Capture request
+    $request = Request::capture();
 
-// Send the response
-$response->send();
+    // Handle the request
+    $response = $kernel->handle($request);
 
-// Terminate
-$kernel->terminate($request, $response);
+    // Send the response
+    $response->send();
+
+    // Terminate
+    $kernel->terminate($request, $response);
+
+} catch (Throwable $e) {
+    // Error occurred during bootstrap or request handling
+    http_response_code(500);
+
+    echo json_encode([
+        'error' => 'Server Error',
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => explode("\n", $e->getTraceAsString()),
+        'environment' => [
+            'APP_KEY_SET' => !empty($_ENV['APP_KEY'] ?? getenv('APP_KEY')),
+            'DB_CONNECTION' => $_ENV['DB_CONNECTION'] ?? getenv('DB_CONNECTION') ?? 'not set',
+            'APP_ENV' => $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'not set',
+        ]
+    ], JSON_PRETTY_PRINT);
+}
