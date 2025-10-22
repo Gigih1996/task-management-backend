@@ -38,8 +38,8 @@ try {
     // Create custom exception handler that NEVER uses views
     $app->singleton(
         \Illuminate\Contracts\Debug\ExceptionHandler::class,
-        function() {
-            return new class extends \Illuminate\Foundation\Exceptions\Handler {
+        function($app) {
+            return new class($app) extends \Illuminate\Foundation\Exceptions\Handler {
                 public function render($request, Throwable $e) {
                     $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
                     if ($status < 100 || $status >= 600) $status = 500;
