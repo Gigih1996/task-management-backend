@@ -107,6 +107,32 @@ try {
     // Capture request
     $request = Request::capture();
 
+    // TEMPORARY FIX: Handle /api/login directly for debugging
+    if ($request->getPathInfo() === '/api/login' && $request->isMethod('POST')) {
+        $controller = $app->make(\App\Http\Controllers\Api\AuthController::class);
+        $loginRequest = new \App\Http\Requests\LoginRequest();
+        $loginRequest->setContainer($app);
+        $loginRequest->setRedirector($app->make('redirect'));
+
+        // Validate manually
+        $data = json_decode($request->getContent(), true) ?? [];
+        $loginRequest->merge($data);
+
+        try {
+            $loginRequest->validateResolved();
+            $response = $controller->login($loginRequest);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $response = new \Illuminate\Http\JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        $response->send();
+        exit;
+    }
+
     // Handle the request
     $response = $kernel->handle($request);
 
