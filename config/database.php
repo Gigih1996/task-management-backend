@@ -128,6 +128,11 @@ return [
             'driver'   => 'mongodb',
             'dsn'      => env('DB_DSN'),
             'database' => env('DB_DATABASE'),
+            'options' => [
+                'tls' => true,
+                'tlsAllowInvalidCertificates' => true,
+                'tlsAllowInvalidHostnames' => true,
+            ],
         ],
     ],
 
