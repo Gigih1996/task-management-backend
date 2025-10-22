@@ -4,15 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     /**
      * Handle a login request to the application.
-     * This is a mock authentication endpoint that returns a token for any valid credentials.
+     * Validates user credentials against database.
      *
      * @param  LoginRequest  $request
      * @return JsonResponse
@@ -21,21 +23,37 @@ class AuthController extends Controller
     {
         $validated = $request->validated();
 
-        // Mock authentication - In production, you would validate against a database
-        // For this mock API, we accept any email/password that passes validation
+        // Check if user exists in database
+        $user = User::where('email', $validated['email'])->first();
 
-        // Generate a mock token
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account tidak ditemukan',
+            ], 401);
+        }
+
+        // Verify password
+        if (!Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password salah',
+            ], 401);
+        }
+
+        // Generate authentication token
         $token = base64_encode(Str::random(60));
 
         return response()->json([
             'success' => true,
-            'message' => 'Login successful',
+            'message' => 'Login berhasil',
             'data' => [
                 'token' => $token,
                 'token_type' => 'Bearer',
                 'user' => [
-                    'email' => $validated['email'],
-                    'name' => explode('@', $validated['email'])[0],
+                    'id' => $user->_id,
+                    'name' => $user->name,
+                    'email' => $user->email,
                 ],
             ],
         ], 200);
