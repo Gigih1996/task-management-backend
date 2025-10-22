@@ -2,11 +2,8 @@
 
 // Laravel Serverless Entry Point for Vercel
 
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
-
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
 
 // Set headers for CORS (before any output)
 header('Access-Control-Allow-Origin: *');
@@ -19,28 +16,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-try {
-    // Define Laravel start time
-    define('LARAVEL_START', microtime(true));
+// Define Laravel start time
+define('LARAVEL_START', microtime(true));
 
-    // Load Composer autoloader
-    require __DIR__ . '/../vendor/autoload.php';
+// Load Composer autoloader
+require __DIR__ . '/../vendor/autoload.php';
 
-    // Bootstrap Laravel application
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
+// Bootstrap Laravel application
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // Handle the request (Laravel 11 style)
-    $app->handleRequest(Request::capture());
+// Create HTTP Kernel
+$kernel = $app->make(Kernel::class);
 
-} catch (\Throwable $e) {
-    // Log error and return JSON response
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode([
-        'error' => 'Server Error',
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => $e->getTraceAsString()
-    ]);
-}
+// Capture request
+$request = Request::capture();
+
+// Handle the request
+$response = $kernel->handle($request);
+
+// Send the response
+$response->send();
+
+// Terminate
+$kernel->terminate($request, $response);
