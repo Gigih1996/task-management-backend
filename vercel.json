@@ -30,6 +30,11 @@
     "QUEUE_CONNECTION": "sync",
     "FILESYSTEM_DISK": "local",
     "BROADCAST_DRIVER": "log",
-    "DB_CONNECTION": "mongodb"
+    "DB_CONNECTION": "mongodb",
+    "APP_SERVICES_CACHE": "/tmp/services.php",
+    "APP_PACKAGES_CACHE": "/tmp/packages.php",
+    "APP_CONFIG_CACHE": "/tmp/config.php",
+    "APP_ROUTES_CACHE": "/tmp/routes.php",
+    "APP_EVENTS_CACHE": "/tmp/events.php"
   }
 }

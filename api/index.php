@@ -32,8 +32,23 @@ try {
     }
     require __DIR__ . '/../vendor/autoload.php';
 
+    // Create /tmp directories for Vercel serverless (only writable directory)
+    $tmpDirs = ['/tmp', '/tmp/views', '/tmp/cache', '/tmp/storage'];
+    foreach ($tmpDirs as $dir) {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+    }
+
+    // Override bootstrap cache path to use /tmp
+    $_ENV['APP_BOOTSTRAP_CACHE'] = '/tmp/cache';
+    putenv('APP_BOOTSTRAP_CACHE=/tmp/cache');
+
     // Bootstrap Laravel application
     $app = require_once __DIR__ . '/../bootstrap/app.php';
+
+    // Set bootstrap cache path on application
+    $app->useBootstrapPath('/tmp/cache');
 
     // Create custom exception handler that NEVER uses views
     $app->singleton(
