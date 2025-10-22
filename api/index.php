@@ -107,30 +107,54 @@ try {
     // Capture request
     $request = Request::capture();
 
-    // TEMPORARY FIX: Handle /api/login directly for debugging
-    if ($request->getPathInfo() === '/api/login' && $request->isMethod('POST')) {
-        $controller = $app->make(\App\Http\Controllers\Api\AuthController::class);
-        $loginRequest = new \App\Http\Requests\LoginRequest();
-        $loginRequest->setContainer($app);
-        $loginRequest->setRedirector($app->make('redirect'));
+    // Get request details for debugging
+    $path = $request->getPathInfo();
+    $method = $request->getMethod();
+    $uri = $request->getRequestUri();
 
-        // Validate manually
-        $data = json_decode($request->getContent(), true) ?? [];
-        $loginRequest->merge($data);
+    // DEBUG: Check multiple path variations for /api/login
+    $isLoginPath = (
+        $path === '/api/login' ||
+        $uri === '/api/login' ||
+        strpos($path, 'login') !== false ||
+        strpos($uri, 'login') !== false
+    );
 
+    // Handle /api/login directly - bypass Laravel routing
+    if ($isLoginPath && strtoupper($method) === 'POST') {
         try {
-            $loginRequest->validateResolved();
+            $controller = $app->make(\App\Http\Controllers\Api\AuthController::class);
+
+            // Create request with data
+            $data = json_decode($request->getContent(), true) ?? [];
+            $loginRequest = new \App\Http\Requests\LoginRequest($data);
+            $loginRequest->setContainer($app);
+
+            // Call controller directly
             $response = $controller->login($loginRequest);
+            $response->send();
+            exit;
         } catch (\Illuminate\Validation\ValidationException $e) {
             $response = new \Illuminate\Http\JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),
                 'errors' => $e->errors(),
             ], 422);
+            $response->send();
+            exit;
+        } catch (\Throwable $e) {
+            $response = new \Illuminate\Http\JsonResponse([
+                'success' => false,
+                'message' => 'Direct handler error: ' . $e->getMessage(),
+                'debug' => [
+                    'path' => $path,
+                    'uri' => $uri,
+                    'method' => $method,
+                ],
+            ], 500);
+            $response->send();
+            exit;
         }
-
-        $response->send();
-        exit;
     }
 
     // Handle the request
