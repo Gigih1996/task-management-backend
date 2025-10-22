@@ -23,8 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Force JSON responses for all exceptions in API
-        $exceptions->shouldRenderJsonWhen(function ($request, Throwable $e) {
-            return true; // Always return JSON
-        });
+        // Use custom exception handler for API-only responses
+        $exceptions->dontReport([]);
     })->create();
